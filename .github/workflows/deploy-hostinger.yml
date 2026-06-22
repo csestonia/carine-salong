@@ -48,5 +48,5 @@ jobs:
           port: 21
           local-dir: ./dist/
           server-dir: ./
-          security: strict
+          security: loose
           log-level: standard
