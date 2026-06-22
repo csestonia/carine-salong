@@ -21,8 +21,8 @@ jobs:
       FTP_SERVER: ${{ secrets.FTP_SERVER || secrets.FTP_HOST || secrets.HOSTINGER_FTP_SERVER || secrets.HOSTINGER_FTP_HOST }}
       FTP_USERNAME: ${{ secrets.FTP_USERNAME || secrets.FTP_USER || secrets.HOSTINGER_FTP_USERNAME || secrets.HOSTINGER_FTP_USER }}
       FTP_PASSWORD: ${{ secrets.FTP_PASSWORD || secrets.FTP_PASS || secrets.HOSTINGER_FTP_PASSWORD || secrets.HOSTINGER_FTP_PASS }}
-      FTP_PORT: ${{ secrets.FTP_PORT || secrets.HOSTINGER_FTP_PORT || '65002' }}
-      FTP_PROTOCOL: ${{ secrets.FTP_PROTOCOL || secrets.HOSTINGER_FTP_PROTOCOL || 'sftp' }}
+      FTP_PORT: ${{ secrets.FTP_PORT || secrets.HOSTINGER_FTP_PORT || '21' }}
+      FTP_PROTOCOL: ${{ secrets.FTP_PROTOCOL || secrets.HOSTINGER_FTP_PROTOCOL || 'ftps' }}
       FTP_SERVER_DIR: ${{ secrets.FTP_SERVER_DIR || secrets.HOSTINGER_FTP_DIR || 'public_html/' }}
 
     steps:
