@@ -49,4 +49,5 @@ jobs:
           local-dir: ./dist/
           server-dir: ./
           security: loose
+          timeout: 120000
           log-level: standard
