@@ -1,0 +1,6 @@
+{
+  "name": "Carine Salong",
+  "description": "Eksklusiivsed kosmeetika ja iluteenused Karine Terzjan'ilt aastast 1997. CIDESCO rahvusvahelise kvaliteediga nahahoolitsused, meik ja konsultatsioonid.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
