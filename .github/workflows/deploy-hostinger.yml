@@ -40,7 +40,7 @@ jobs:
       - name: Deploy via FTP
         uses: SamKirkland/ftp-deploy-action@v4.3.3
         with:
-          server: ${{ secrets.FTP_HOST }}
+          server: 46.202.158.135
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
           protocol: ftp
