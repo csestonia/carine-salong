@@ -65,6 +65,25 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y lftp
 
+      - name: Verify Hostinger FTPS login
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          server="${FTP_SERVER#ftp://}"
+          server="${server#ftps://}"
+          server="${server#sftp://}"
+
+          curl --silent --show-error --fail \
+            --connect-timeout 15 \
+            --max-time 45 \
+            --ftp-ssl-reqd \
+            --insecure \
+            --user "$FTP_USERNAME:$FTP_PASSWORD" \
+            --list-only \
+            --output /dev/null \
+            "ftp://${server}:21/"
+
       - name: Upload dist to Hostinger
         shell: bash
         run: |
