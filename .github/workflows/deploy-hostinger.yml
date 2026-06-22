@@ -17,33 +17,10 @@ jobs:
     timeout-minutes: 30
     permissions:
       contents: read
-    env:
-      FTP_SERVER: ${{ secrets.FTP_SERVER || secrets.FTP_HOST || secrets.HOSTINGER_FTP_SERVER || secrets.HOSTINGER_FTP_HOST }}
-      FTP_USERNAME: ${{ secrets.FTP_USERNAME || secrets.FTP_USER || secrets.HOSTINGER_FTP_USERNAME || secrets.HOSTINGER_FTP_USER }}
-      FTP_PASSWORD: ${{ secrets.FTP_PASSWORD || secrets.FTP_PASS || secrets.HOSTINGER_FTP_PASSWORD || secrets.HOSTINGER_FTP_PASS }}
-      FTP_PORT: ${{ secrets.FTP_PORT || secrets.HOSTINGER_FTP_PORT || '21' }}
-      FTP_PROTOCOL: ${{ secrets.FTP_PROTOCOL || secrets.HOSTINGER_FTP_PROTOCOL || 'ftps' }}
-      FTP_SERVER_DIR: ${{ secrets.FTP_SERVER_DIR || secrets.HOSTINGER_FTP_DIR || 'public_html/' }}
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
-
-      - name: Validate deploy secrets
-        shell: bash
-        run: |
-          missing=0
-
-          for var in FTP_SERVER FTP_USERNAME FTP_PASSWORD; do
-            if [ -z "${!var}" ]; then
-              echo "::error title=Missing secret::$var is empty. Add a matching GitHub Actions secret before deploying."
-              missing=1
-            fi
-          done
-
-          if [ "$missing" -ne 0 ]; then
-            exit 1
-          fi
 
       - name: Set up Node.js
         uses: actions/setup-node@v6
@@ -60,66 +37,13 @@ jobs:
       - name: Build production site
         run: npm run build
 
-      - name: Install FTP client
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y lftp
-
-      - name: Verify Hostinger FTPS login
-        shell: bash
-        run: |
-          set -euo pipefail
-
-          server="${FTP_SERVER#ftp://}"
-          server="${server#ftps://}"
-          server="${server#sftp://}"
-
-          curl --silent --show-error --fail \
-            --connect-timeout 15 \
-            --max-time 45 \
-            --ftp-ssl-reqd \
-            --insecure \
-            --user "$FTP_USERNAME:$FTP_PASSWORD" \
-            --list-only \
-            --output /dev/null \
-            "ftp://${server}:21/"
-
-      - name: Upload dist to Hostinger
-        shell: bash
-        run: |
-          set -euo pipefail
-
-          server="${FTP_SERVER#ftp://}"
-          server="${server#ftps://}"
-          server="${server#sftp://}"
-          protocol="${FTP_PROTOCOL,,}"
-
-          case "$protocol" in
-            sftp)
-              open_url="sftp://$server"
-              ssl_settings="set sftp:auto-confirm yes;"
-              ;;
-            ftps)
-              open_url="ftp://$server"
-              ssl_settings="set ftp:ssl-force true; set ftp:ssl-protect-data true; set ssl:verify-certificate false;"
-              ;;
-            ftp)
-              open_url="ftp://$server"
-              ssl_settings="set ftp:ssl-force false;"
-              ;;
-            *)
-              echo "::error title=Invalid FTP protocol::FTP_PROTOCOL must be ftp, ftps or sftp."
-              exit 1
-              ;;
-          esac
-
-          lftp -u "$FTP_USERNAME","$FTP_PASSWORD" -p "$FTP_PORT" "$open_url" <<LFTP
-            set cmd:fail-exit true;
-            set net:max-retries 3;
-            set net:timeout 30;
-            set ftp:passive-mode true;
-            $ssl_settings
-            mkdir -p "$FTP_SERVER_DIR";
-            mirror --reverse --only-newer --verbose=3 --parallel=4 --exclude-glob .DS_Store --exclude-glob .git* --exclude-glob node_modules ./dist/ "$FTP_SERVER_DIR";
-            bye
-          LFTP
+      - name: Deploy via FTP
+        uses: SamKirkland/ftp-deploy-action@v4.3.3
+        with:
+          server: ${{ secrets.FTP_HOST }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          protocol: ftp
+          local-dir: dist/
+          server-dir: ./
+          dangerous-clean-slate: false
